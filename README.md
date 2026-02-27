@@ -1,10 +1,10 @@
-# myStock-AI 🚀
+# iStock 🚀
 
 智能股票分析与预测系统 - 基于机器学习的专业投资助手
 
 ## 📊 项目概述
 
-myStock-AI是一个集成了实时行情监控、技术指标分析、机器学习预测和Web可视化界面的智能股票分析系统。系统旨在为投资者提供专业的数据分析和决策支持。
+iStock是一个集成了实时行情监控、技术指标分析、机器学习预测和Web可视化界面的智能股票分析系统。系统旨在为投资者提供专业的数据分析和决策支持。
 
 ## 🎯 核心功能
 
@@ -30,7 +30,7 @@ myStock-AI是一个集成了实时行情监控、技术指标分析、机器学�
 ## 🏗️ 系统架构
 
 ```
-myStock-AI/
+iStock/
 ├── 📁 data/                    # 数据存储
 ├── 📁 src/                    # 源代码
 │   ├── core/                  # 核心逻辑
@@ -88,8 +88,8 @@ myStock-AI/
 ### 本地开发
 ```bash
 # 克隆仓库
-git clone https://github.com/yourname/myStock-AI.git
-cd myStock-AI
+git clone https://github.com/yourname/iStock.git
+cd iStock
 
 # 后端环境
 cd backend
@@ -243,11 +243,11 @@ docker-compose -f docker-compose.prod.yml up -d
 ## 📞 支持与联系
 
 ### 问题反馈
-- GitHub Issues: [问题报告](https://github.com/yourname/myStock-AI/issues)
-- 邮件支持: support@mystock-ai.com
+- GitHub Issues: [问题报告](https://github.com/yourname/iStock/issues)
+- 邮件支持: support@istock.com
 
 ### 社区交流
-- Discord: [加入讨论](https://discord.gg/mystock-ai)
+- Discord: [加入讨论](https://discord.gg/istock)
 - 微信群: 扫码加入（待创建）
 
 ## 🙏 致谢
@@ -256,4 +256,4 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ---
 
-**myStock-AI - 让投资更智能，让决策更科学** 🚀
+**iStock - 让投资更智能，让决策更科学** 🚀
