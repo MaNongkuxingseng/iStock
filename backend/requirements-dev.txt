@@ -1,0 +1,113 @@
+# iStock 开发环境依赖
+# 用于CI/CD流水线和开发环境
+
+# 基础依赖（与requirements.txt相同）
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# 数据库
+sqlalchemy==2.0.23
+alembic==1.12.1
+psycopg2-binary==2.9.9
+asyncpg==0.29.0
+
+# 缓存和消息队列
+redis==5.0.1
+celery==5.3.4
+
+# 数据处理
+pandas==2.1.4
+numpy==1.26.2
+scipy==1.11.4
+
+# 机器学习
+scikit-learn==1.3.2
+torch==2.1.1
+torchvision==0.16.1
+xgboost==2.0.2
+
+# 技术指标
+TA-Lib==0.4.28
+
+# HTTP 客户端
+httpx==0.25.1
+aiohttp==3.9.1
+requests==2.31.0
+
+# 工具库
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+loguru==0.7.2
+
+# ============================================
+# 开发专用依赖（不在生产环境中）
+# ============================================
+
+# 测试框架
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-xdist==3.5.0
+
+# 代码质量和格式化
+black==23.11.0
+isort==5.12.0
+flake8==6.1.0
+flake8-docstrings==1.7.0
+flake8-import-order==0.18.1
+mypy==1.7.0
+pre-commit==3.5.0
+
+# 文档生成
+mkdocs==1.5.3
+mkdocs-material==9.4.6
+mkdocstrings[python]==0.24.0
+
+# 开发工具
+ipython==8.18.1
+jupyter==1.0.0
+notebook==7.0.6
+jupyterlab==4.0.10
+
+# HTTP客户端工具
+httpie==3.2.2
+
+# 数据库工具
+sqlalchemy-utils==0.41.1
+
+# 监控和调试
+debugpy==1.8.0
+memory-profiler==0.61.0
+line-profiler==4.1.2
+
+# 安全扫描
+bandit==1.7.5
+safety==2.3.5
+
+# 类型检查
+types-requests==2.31.0.10
+types-redis==4.6.0.10
+
+# 数据科学工具
+matplotlib==3.8.2
+seaborn==0.13.0
+plotly==5.18.0
+
+# ============================================
+# 安装说明
+# ============================================
+
+# 生产环境安装：
+# pip install -r requirements.txt
+
+# 开发环境安装：
+# pip install -r requirements-dev.txt
+
+# CI/CD环境安装：
+# pip install -r requirements-dev.txt --no-deps
+
+# 最小化安装（仅测试）：
+# pip install pytest pytest-asyncio pytest-cov
