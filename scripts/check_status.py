@@ -256,9 +256,9 @@ def check_git_status():
 def generate_status_report():
     """生成状态报告"""
     print("\n" + "=" * 60)
-    print("📋 iStock项目状态报告")
+    print("iStock Project Status Report")
     print("=" * 60)
-    print(f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     checks = [
         ("Docker状态", check_docker_status),
@@ -282,7 +282,7 @@ def generate_status_report():
             results.append((check_name, False))
     
     print("\n" + "=" * 60)
-    print("📊 状态总结:")
+    print("Status Summary:")
     print("=" * 60)
     
     healthy = sum(1 for _, result in results if result)
@@ -295,13 +295,13 @@ def generate_status_report():
     print(f"\n健康度: {healthy}/{total} ({healthy/total*100:.1f}%)")
     
     if healthy == total:
-        print("\n🎉 所有系统正常！")
-        print("\n🌐 访问地址:")
-        print("  后端API: http://localhost:8000")
-        print("  前端应用: http://localhost:3000")
-        print("  API文档: http://localhost:8000/docs")
+        print("\nSUCCESS: All systems normal!")
+        print("\nAccess URLs:")
+        print("  Backend API: http://localhost:8000")
+        print("  Frontend App: http://localhost:3000")
+        print("  API Docs: http://localhost:8000/docs")
     else:
-        print(f"\n⚠️  有 {total - healthy} 个问题需要修复")
+        print(f"\nWARNING: {total - healthy} issues need fixing")
         
         # 提供修复建议
         print("\n🔧 修复建议:")
