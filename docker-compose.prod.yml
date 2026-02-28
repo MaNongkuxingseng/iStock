@@ -1,0 +1,180 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mystock_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mystock_password}
+      POSTGRES_DB: ${POSTGRES_DB:-mystock_ai}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - istock_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mystock_user} -d ${POSTGRES_DB:-mystock_ai}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache and Message Broker
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
+    volumes:
+      - redis_data:/data
+    networks:
+      - istock_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_password}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API Service
+  backend:
+    image: ${DOCKER_USERNAME}/istock-backend:latest
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-mystock_user}:${POSTGRES_PASSWORD:-mystock_password}@postgres:5432/${POSTGRES_DB:-mystock_ai}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      DEBUG: ${DEBUG:-false}
+      SECRET_KEY: ${SECRET_KEY}
+      API_V1_STR: /api/v1
+      PROJECT_NAME: iStock
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+    volumes:
+      - logs:/app/logs
+      - data:/app/data
+      - cache:/app/cache
+    networks:
+      - istock_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Worker
+  celery_worker:
+    image: ${DOCKER_USERNAME}/istock-backend:latest
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-mystock_user}:${POSTGRES_PASSWORD:-mystock_password}@postgres:5432/${POSTGRES_DB:-mystock_ai}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+    volumes:
+      - logs:/app/logs
+      - data:/app/data
+      - cache:/app/cache
+    networks:
+      - istock_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: celery -A backend.tasks.celery_app worker --loglevel=info --concurrency=4
+
+  # Celery Beat (Scheduler)
+  celery_beat:
+    image: ${DOCKER_USERNAME}/istock-backend:latest
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-mystock_user}:${POSTGRES_PASSWORD:-mystock_password}@postgres:5432/${POSTGRES_DB:-mystock_ai}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+    volumes:
+      - logs:/app/logs
+      - data:/app/data
+      - cache:/app/cache
+    networks:
+      - istock_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: celery -A backend.tasks.celery_app beat --loglevel=info
+
+  # Frontend Service
+  frontend:
+    image: ${DOCKER_USERNAME}/istock-frontend:latest
+    environment:
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8000}
+      REACT_APP_WS_URL: ${REACT_APP_WS_URL:-ws://localhost:8000}
+    networks:
+      - istock_network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+      - ./docker/nginx/htpasswd:/etc/nginx/htpasswd
+    networks:
+      - istock_network
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - istock_network
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - istock_network
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+
+volumes:
+  postgres_data:
+  redis_data:
+  logs:
+  data:
+  cache:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  istock_network:
+    driver: bridge
