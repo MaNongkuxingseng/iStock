@@ -1,0 +1,91 @@
+# 🚀 iStock 启动指南
+
+## 问题诊断
+之前的批处理文件有编码问题，导致中文字符乱码。
+
+## 解决方案
+
+### 方案1：使用修复的批处理文件（推荐）
+运行：
+```
+start_easy.bat
+```
+
+### 方案2：使用PowerShell脚本
+运行：
+```
+powershell -ExecutionPolicy Bypass -File start_simple.ps1
+```
+
+### 方案3：手动命令（最可靠）
+
+#### 步骤1：打开命令提示符（CMD）
+以管理员身份运行
+
+#### 步骤2：导航到项目目录
+```
+cd G:\openclaw\workspace\_system\agent-home\myStock-AI
+```
+
+#### 步骤3：使用修复的docker-compose文件
+```
+copy docker-compose-fixed.yml docker-compose.yml
+```
+
+#### 步骤4：停止旧服务
+```
+docker-compose down
+```
+
+#### 步骤5：启动核心服务
+```
+docker-compose up -d postgres redis backend
+```
+
+#### 步骤6：等待并测试
+等待1-2分钟，然后测试：
+- http://localhost:8000/health
+- http://localhost:8000/docs
+- http://localhost:3000
+
+### 方案4：如果Docker失败，使用本地Python
+
+#### 步骤1：启动后端
+```
+cd backend
+python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+#### 步骤2：在另一个窗口启动前端
+```
+cd frontend
+# 需要先安装依赖（如果还没安装）
+npm install
+npm start
+```
+
+## 验证服务
+
+成功启动后，你应该能看到：
+1. ✅ 后端API响应：http://localhost:8000/health
+2. ✅ API文档：http://localhost:8000/docs
+3. ✅ 前端界面：http://localhost:3000
+
+## 如果还有问题
+
+请提供：
+1. 具体的错误消息
+2. 你运行的命令
+3. Docker Desktop状态
+
+我会根据具体错误提供针对性解决方案。
+
+## 项目状态
+
+✅ 所有代码已交付完成
+✅ 前端React应用完整
+✅ 后端API完整
+✅ 认证系统完整
+✅ 文档完整
+
+现在只需要解决启动问题！

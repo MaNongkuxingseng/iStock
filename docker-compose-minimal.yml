@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Backend API Service Only (no external dependencies)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      # Use SQLite for local development (no PostgreSQL needed)
+      DATABASE_URL: sqlite:///./istock.db
+      DEBUG: "true"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./local:/app/local
+      - ./data:/app/data
+    command: >
+      sh -c "python -m uvicorn backend.src.api.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # Frontend Service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    environment:
+      REACT_APP_API_URL: http://localhost:8000/api/v1
+    depends_on:
+      - backend
+
+volumes:
+  data:
